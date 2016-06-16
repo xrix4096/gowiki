@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 )
@@ -44,21 +44,30 @@ func loadPage(title string) (*Page, error) {
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):]
 	p, _ := loadPage(title)
-	fmt.Fprintf(w, "<h1>%s</h1><div>%s</div>", p.Title, p.Body)
+	renderTemplate(w, "view", p)
 }
 
+//
+// editHandler
+// Load or create the page specified in the request into an HTML edit form
+//
 func editHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/edit/"):]
 	p, err := loadPage(title)
 	if err != nil {
 		p = &Page{Title: title} // Create page if not existing
 	}
-	fmt.Fprintf(w, "<h1>Editing %s</h1>" +
-		"<form action=\"/save/%s\" method=\"POST\">" +
-		"<textarea name=\"body\">%s</textarea><br>" +
-		"<input type=\"submit\" value=\"Save\">" +
-		"</form>",
-		p.Title, p.Title, p.Body)
+	renderTemplate(w, "edit", p)
+}
+
+//
+// renderTemplate
+// Load the specified HTML template file and subsitute the variables in the
+// specified page
+//
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	t, _ := template.ParseFiles(tmpl + ".html")
+	t.Execute(w, p)
 }
 
 
@@ -68,7 +77,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
-	http.HandleFunc("/save/", saveHandler)
+	//http.HandleFunc("/save/", saveHandler)
 	http.ListenAndServe(":8080", nil)
 }
 
