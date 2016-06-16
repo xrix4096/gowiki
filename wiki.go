@@ -7,6 +7,11 @@ import (
 )
 
 //
+// Globals
+//
+var gTemplates = template.Must(template.ParseFiles("edit.html", "view.html"))
+
+//
 // Page type: Each page has a title and a body
 //
 type Page struct {
@@ -87,12 +92,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 // specified page
 //
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	t, err := template.ParseFiles(tmpl + ".html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	err = t.Execute(w, p)
+	err := gTemplates.ExecuteTemplate(w, tmpl+".html", p)
 	if  err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
