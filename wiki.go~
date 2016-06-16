@@ -1,0 +1,25 @@
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+)
+
+//
+// Page type: Each page has a title and a body
+//
+type Page struct {
+	Title string
+	Body  []byte // byte 'slice' TODO learn about those
+}
+
+//
+// Save method for writing a page to a file:
+// Takes a pointer to a page 'p' as input, return type is 'error'
+//
+func (p *Page) save() error {
+	filename := p.Title + ".txt"
+	return ioutil.WriteFile(filename, p.Body, 0600)
+}
+
+
